@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1017" />
+  <title>Campus Event Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" data-nav="events"><span class="brand-mark">✳</span><span>campus<span class="brand-light">flow</span></span></a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav>
+        <a class="nav-link active" href="#" data-nav="events"><span>◫</span> Events <span class="nav-count" id="eventNavCount">00</span></a>
+        <a class="nav-link" href="#" data-nav="registrations"><span>♧</span> Registrations <span class="nav-count" id="regNavCount" style="display:none"></span></a>
+        <a class="nav-link" href="#" data-nav="analytics"><span>▥</span> Analytics</a>
+      </nav>
+      <div class="sidebar-bottom"><div class="status-dot"></div><div><b>Campus database</b><small>MongoDB connected</small></div><span class="more">···</span></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="crumb" id="breadcrumb">Workspace <span>/</span> Events</div>
+        <div class="top-actions"><span class="today" id="todayLabel"></span><button class="avatar" aria-label="User profile">A</button></div>
+      </header>
+
+      <!-- ═══════════════ EVENTS VIEW ═══════════════ -->
+      <div id="view-events">
+        <section class="page-heading">
+          <div><div class="eyebrow"><span class="live-dot"></span> CAMPUS EVENTS</div><h1>Event command center</h1><p>Discover events, manage registrations, and keep every seat moving.</p></div>
+          <button class="button button-dark" id="refreshButton"><span>↻</span> Refresh data</button>
+        </section>
+
+        <section class="stats-grid" aria-label="Event statistics">
+          <article class="stat-card"><div class="stat-top"><span>Total events</span><span class="stat-icon lavender">◫</span></div><strong id="statEvents">—</strong><small><i class="positive">↗</i> Across campus</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Registrations</span><span class="stat-icon mint">♧</span></div><strong id="statRegistrations">—</strong><small><i class="positive">↗</i> Student sign-ups</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Checked in</span><span class="stat-icon peach">✓</span></div><strong id="statCheckedIn">—</strong><small><i class="neutral">●</i> Attendance recorded</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Ticket revenue</span><span class="stat-icon yellow">₹</span></div><strong id="statRevenue">—</strong><small><i class="positive">↗</i> From ticket sales</small></article>
+        </section>
+
+        <section class="content-panel">
+          <div class="section-heading"><div><h2>Explore events</h2><p>Find the right thing to show up for.</p></div><div class="view-toggle"><button class="selected" aria-label="Grid view">▦</button><button aria-label="List view">☰</button></div></div>
+          <div class="toolbar"><label class="searchbox"><span>⌕</span><input id="searchInput" type="search" placeholder="Search events, clubs, tags..." /></label><select id="categorySelect" aria-label="Filter by category"><option value="">All categories</option><option>Technical</option><option>Cultural</option></select><button class="filter-button" id="freeFilter">♧ <span>Free only</span><span class="switch"></span></button></div>
+          <div class="filter-chips"><button class="chip active" data-category="">All events <span id="allCount">0</span></button><button class="chip" data-category="Technical">Technical</button><button class="chip" data-category="Cultural">Cultural</button><button class="chip" id="tagFilter"># Coding &amp; hackathons</button></div>
+          <div id="eventGrid" class="event-grid"><div class="loading">Loading campus events…</div></div>
+        </section>
+
+        <section class="lower-grid">
+          <article class="content-panel compact-panel"><div class="section-heading"><div><h2>Department activity</h2><p>Registration breakdown</p></div><span class="panel-icon">▥</span></div><div id="departmentList" class="department-list"></div></article>
+          <article class="content-panel compact-panel"><div class="section-heading"><div><h2>Attendance snapshot</h2><p>Turnout by event</p></div><span class="panel-icon">◷</span></div><div id="turnoutList" class="turnout-list"></div></article>
+        </section>
+        <footer>CampusFlow <span>·</span> Smart Campus Event Engine <span>·</span> Powered by MongoDB</footer>
+      </div>
+
+      <!-- ═══════════════ REGISTRATIONS VIEW ═══════════════ -->
+      <div id="view-registrations" style="display:none">
+        <section class="page-heading">
+          <div><div class="eyebrow"><span class="live-dot"></span> REGISTRATIONS</div><h1>All registrations</h1><p>View tickets, check-in status, and manage student attendance.</p></div>
+          <button class="button button-dark" id="regRefreshButton"><span>↻</span> Refresh</button>
+        </section>
+        <section class="content-panel">
+          <div class="section-heading">
+            <div><h2>Ticket registry</h2><p>All student registrations across events.</p></div>
+            <div class="reg-toolbar">
+              <select id="regDeptFilter" aria-label="Filter by department"><option value="">All departments</option></select>
+            </div>
+          </div>
+          <div id="regTableWrap" class="reg-table-wrap">
+            <div class="loading">Loading registrations…</div>
+          </div>
+        </section>
+        <footer>CampusFlow <span>·</span> Smart Campus Event Engine <span>·</span> Powered by MongoDB</footer>
+      </div>
+
+      <!-- ═══════════════ ANALYTICS VIEW ═══════════════ -->
+      <div id="view-analytics" style="display:none">
+        <section class="page-heading">
+          <div><div class="eyebrow"><span class="live-dot"></span> ANALYTICS</div><h1>Campus insights</h1><p>Revenue, attendance, and department engagement at a glance.</p></div>
+          <button class="button button-dark" id="analyticsRefreshButton"><span>↻</span> Refresh</button>
+        </section>
+
+        <section class="stats-grid" aria-label="Analytics overview">
+          <article class="stat-card"><div class="stat-top"><span>Total events</span><span class="stat-icon lavender">◫</span></div><strong id="aStatEvents">—</strong><small><i class="positive">↗</i> Across campus</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Registrations</span><span class="stat-icon mint">♧</span></div><strong id="aStatRegistrations">—</strong><small><i class="positive">↗</i> Student sign-ups</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Checked in</span><span class="stat-icon peach">✓</span></div><strong id="aStatCheckedIn">—</strong><small><i class="neutral">●</i> Attendance recorded</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Ticket revenue</span><span class="stat-icon yellow">₹</span></div><strong id="aStatRevenue">—</strong><small><i class="positive">↗</i> From ticket sales</small></article>
+        </section>
+
+        <div class="lower-grid" style="margin-bottom:16px">
+          <section class="content-panel compact-panel" style="min-height:auto">
+            <div class="section-heading"><div><h2>Revenue by event</h2><p>Ticket sales per event</p></div><span class="panel-icon">₹</span></div>
+            <div id="revenueList" class="department-list"><div class="loading">Loading…</div></div>
+          </section>
+          <section class="content-panel compact-panel" style="min-height:auto">
+            <div class="section-heading"><div><h2>Revenue by club</h2><p>Organiser earnings</p></div><span class="panel-icon">♧</span></div>
+            <div id="revenueClubList" class="department-list"><div class="loading">Loading…</div></div>
+          </section>
+        </div>
+
+        <div class="lower-grid">
+          <section class="content-panel compact-panel">
+            <div class="section-heading"><div><h2>Department activity</h2><p>Registrations by department</p></div><span class="panel-icon">▥</span></div>
+            <div id="aDepartmentList" class="department-list"><div class="loading">Loading…</div></div>
+          </section>
+          <section class="content-panel compact-panel">
+            <div class="section-heading"><div><h2>Attendance turnout</h2><p>Check-in rate by event</p></div><span class="panel-icon">◷</span></div>
+            <div id="aTurnoutList" class="turnout-list"><div class="loading">Loading…</div></div>
+          </section>
+        </div>
+        <footer>CampusFlow <span>·</span> Smart Campus Event Engine <span>·</span> Powered by MongoDB</footer>
+      </div>
+    </main>
+  </div>
+
+  <!-- Booking dialog -->
+  <dialog id="bookingDialog">
+    <form method="dialog" id="bookingForm">
+      <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+      <div class="eyebrow">RESERVE YOUR SPOT</div>
+      <h2 id="bookingTitle">Book an event</h2>
+      <p class="dialog-copy">Your ticket will be added to campus registrations.</p>
+      <input type="hidden" id="bookingEventId" />
+      <label>Student name<input name="studentName" required placeholder="e.g. Aisha Patel" /></label>
+      <label>Student ID<input name="studentId" required placeholder="e.g. STU8821" /></label>
+      <div class="form-row">
+        <label>Department<input name="department" required placeholder="e.g. Computer Science" /></label>
+        <label>Year<input name="year" required type="number" min="1" max="8" placeholder="3" /></label>
+      </div>
+      <label>Payment method<select name="method"><option>UPI</option><option>Card</option><option>Cash</option></select></label>
+      <button class="button button-primary submit-booking" type="submit">Confirm registration <span>→</span></button>
+      <div id="bookingMessage" class="form-message"></div>
+    </form>
+  </dialog>
+
+  <!-- Sponsor dialog -->
+  <dialog id="sponsorDialog">
+    <form method="dialog" id="sponsorForm">
+      <button class="dialog-close" value="cancel" aria-label="Close">×</button>
+      <div class="eyebrow">ADD SPONSOR</div>
+      <h2 id="sponsorEventTitle">Event</h2>
+      <p class="dialog-copy">Add a sponsor name to this event.</p>
+      <input type="hidden" id="sponsorEventId" />
+      <label>Sponsor name<input name="sponsor" required placeholder="e.g. TechCorp" /></label>
+      <button class="button button-primary submit-booking" type="submit">Add sponsor <span>→</span></button>
+      <div id="sponsorMessage" class="form-message"></div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
